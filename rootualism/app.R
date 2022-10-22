@@ -8,6 +8,8 @@
 #
 
 library(shiny)
+library(tidyverse)
+library(ggplot2)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -40,10 +42,16 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-
+  size <- 20
   garden <- tibble(tile = factor(rep(c("air", "ground"), each = size)),
                    x = rep(1:5, 8),
                    y = rep(8:1, each = 5))
+  
+  plant <- tibble(growth = c("root", "shoot"),
+                  type = c("root", "leaf"),
+                  loc = "core",
+                  x = c(3,3),
+                  y = c(4,5))
   
   click_coords <- reactiveValues(xy = tibble(x = c(-1,-1),  y = c(-1,-1)))
   
@@ -58,9 +66,17 @@ server <- function(input, output) {
     ggplot(data = garden) +
       geom_tile(aes(x = x, y = y, fill = tile),
                 color = "black", alpha = 0.7) +
-      geom_point(data = click_coords$xy, aes(x = x, y = y), size = 8) +
+      geom_tile(data = filter(plant, loc == "core"),
+                aes(x = x, y = y, fill = growth),
+                width = 0.5) +
+      geom_tile(data = click_coords$xy, aes(x = x, y = y), 
+                color = "magenta", fill = "magenta", 
+                alpha = 0.2) +
+      geom_tile(data = plant,
+                aes(x = x, y = y, fill = growth),
+                height = 0.2) +
       coord_fixed(xlim = c(0,6), ylim = c(0,9), expand = FALSE) +
-      scale_fill_manual(values = c("skyblue", "tan4"), guide = "none") +
+      scale_fill_manual(values = c("skyblue", "tan3", "tan4", "darkgreen"), guide = "none") +
       theme_void()
   })
 
